@@ -20,3 +20,9 @@ create table comment (
   text      varchar(500),
   primary key (id)
 );
+
+
+create table hibernate_sequence (
+  next_val integer
+);
+insert into hibernate_sequence values (1);
