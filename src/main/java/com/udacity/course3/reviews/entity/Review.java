@@ -3,6 +3,8 @@ package com.udacity.course3.reviews.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
@@ -19,9 +21,11 @@ public class Review {
     private Product product;
 
     @Column(name = "RATING")
+    @NotNull
     private Float rating;
 
     @Column(name = "TEXT")
+    @NotBlank
     private String text;
 
     @JsonIgnore

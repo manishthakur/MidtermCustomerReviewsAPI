@@ -3,6 +3,8 @@ package com.udacity.course3.reviews.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +18,11 @@ public class Product {
     private Integer id;
 
     @Column(name = "NAME")
+    @NotBlank
     private String name;
 
     @Column(name = "PRICE")
+    @NotNull
     private Double price;
 
     @JsonIgnore
