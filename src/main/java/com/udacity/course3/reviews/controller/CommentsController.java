@@ -17,7 +17,6 @@ import java.util.Optional;
  * Spring REST controller for working with comment entity.
  */
 @RestController
-@RequestMapping("/comments")
 public class CommentsController {
 
     @Autowired
@@ -35,7 +34,7 @@ public class CommentsController {
      *
      * @param reviewId The id of the review.
      */
-    @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/comments/reviews/{reviewId}", method = RequestMethod.POST)
     public ResponseEntity<?> createCommentForReview(@PathVariable("reviewId") Integer reviewId, @RequestBody Comment comment) {
         Optional<Review> optionalReview = reviewRepository.findById(reviewId);
         Review review = optionalReview.get();
@@ -53,7 +52,7 @@ public class CommentsController {
      *
      * @param reviewId The id of the review.
      */
-    @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/comments/reviews/{reviewId}", method = RequestMethod.GET)
     public List<?> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
         List<Comment> comments = commentRepository.findByReviewId(reviewId);
         if (comments == null || comments.isEmpty()) {
