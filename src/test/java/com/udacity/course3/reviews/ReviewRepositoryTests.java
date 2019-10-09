@@ -3,6 +3,7 @@ package com.udacity.course3.reviews;
 import com.udacity.course3.reviews.entity.Product;
 import com.udacity.course3.reviews.entity.Review;
 import com.udacity.course3.reviews.repository.ProductRepository;
+import com.udacity.course3.reviews.repository.ReviewDocumentRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
