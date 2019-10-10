@@ -1,8 +1,6 @@
 package com.udacity.course3.reviews.controller;
 
-import com.udacity.course3.reviews.entity.Product;
-import com.udacity.course3.reviews.entity.Review;
-import com.udacity.course3.reviews.entity.ReviewDocument;
+import com.udacity.course3.reviews.entity.*;
 import com.udacity.course3.reviews.repository.ProductRepository;
 import com.udacity.course3.reviews.repository.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
@@ -12,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +25,7 @@ public class ReviewsController {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
-    private ReviewMongoRepository documentRepository;
+    private ReviewMongoRepository reviewMongoRepository;
 
     /**
      * Creates a review for a product.
@@ -42,16 +40,22 @@ public class ReviewsController {
      */
     @RequestMapping(value = "/reviews/products/{productId}", method = RequestMethod.POST)
     public ResponseEntity<?> createReviewForProduct(@PathVariable("productId") Integer productId, @RequestBody @Valid Review review) {
+
         Optional<Product> productOptional = productRepository.findById(productId);
         if (!productOptional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         review.setProduct(productOptional.get());
         review = reviewRepository.save(review);
+
         if (review == null) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(review, HttpStatus.OK);
+        ReviewDocument reviewDocument = copy(review);
+        if (reviewDocument != null) {
+            reviewMongoRepository.save(reviewDocument);
+        }
+        return new ResponseEntity<>(reviewDocument, HttpStatus.OK);
     }
 
     /**
@@ -62,50 +66,50 @@ public class ReviewsController {
      */
     @RequestMapping(value = "/reviews/products/{productId}", method = RequestMethod.GET)
     public ResponseEntity<List<?>> listReviewsForProduct(@PathVariable("productId") Integer productId) {
+
         List<Review> reviews = reviewRepository.findByProductId(productId);
         if (reviews == null || reviews.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(reviews, HttpStatus.OK);
-    }
-
-    /**
-     * Creates a reviewDocument document for a product.
-     * <p>
-     * 1. Add argument for reviewDocument document. Use {@link RequestBody} annotation.
-     * 2. Check for existence of product.
-     * 3. If product not found, return NOT_FOUND.
-     * 4. If found, save reviewDocument.
-     *
-     * @param productId The id of the product.
-     * @return The created reviewDocument or 404 if product id is not found.
-     */
-    @RequestMapping(value = "/reviewdocs/products/{productId}", method = RequestMethod.POST)
-    public ResponseEntity<?> createReviewDocumentForProduct(@PathVariable("productId") Integer productId, @RequestBody @Valid ReviewDocument reviewDocument) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (!productOptional.isPresent()) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-        reviewDocument.setProductId(productOptional.get().getId().toString());
-        reviewDocument = documentRepository.save(reviewDocument);
-        if (reviewDocument == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(reviewDocument, HttpStatus.OK);
-    }
-
-    /**
-     * Lists reviews document by product.
-     *
-     * @param productId The id of the product.
-     * @return The list of reviews.
-     */
-    @RequestMapping(value = "/reviewdocs/products/{productId}", method = RequestMethod.GET)
-    public ResponseEntity<List<?>> listReviewsDocumentForProduct(@PathVariable("productId") @NotNull Integer productId) {
-        List<ReviewDocument> reviewDocuments = documentRepository.findByProductId(productId.toString());
-        if (reviewDocuments == null || reviewDocuments.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        List<ReviewDocument> reviewDocuments = new ArrayList<>();
+        reviews.forEach(review -> {
+            Optional<ReviewDocument> reviewDocument = reviewMongoRepository.findById(review.getId().toString());
+            if (reviewDocument.isPresent()) {
+                reviewDocuments.add(reviewDocument.get());
+            }
+        });
         return new ResponseEntity<>(reviewDocuments, HttpStatus.OK);
+    }
+
+    private ReviewDocument copy(Review review) {
+
+        if (review == null) {
+            return null;
+        }
+        ReviewDocument reviewDocument = new ReviewDocument();
+        reviewDocument.setId(review.getId().toString());
+        reviewDocument.setProductId(review.getProduct().getId().toString());
+        reviewDocument.setText(review.getText());
+        reviewDocument.setRating(review.getRating());
+
+        if (review.getComments() != null) {
+            review.getComments().forEach(comment -> {
+                CommentDocument commentDocument = copy(comment);
+                if (commentDocument != null) {
+                    reviewDocument.getComments().add(commentDocument);
+                }
+            });
+        }
+        return reviewDocument;
+    }
+
+    private CommentDocument copy(Comment comment) {
+        if (comment == null) {
+            return null;
+        }
+        CommentDocument commentDocument = new CommentDocument();
+        commentDocument.setId(comment.getId().toString());
+        commentDocument.setText(comment.getText());
+        return commentDocument;
     }
 }

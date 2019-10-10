@@ -1,8 +1,11 @@
 package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.entity.Comment;
+import com.udacity.course3.reviews.entity.CommentDocument;
 import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.entity.ReviewDocument;
 import com.udacity.course3.reviews.repository.CommentRepository;
+import com.udacity.course3.reviews.repository.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,8 @@ public class CommentsController {
     private CommentRepository commentRepository;
     @Autowired
     private ReviewRepository reviewRepository;
+    @Autowired
+    private ReviewMongoRepository reviewMongoRepository;
 
     /**
      * Creates a comment for a review.
@@ -36,12 +41,28 @@ public class CommentsController {
      * @param reviewId The id of the review.
      */
     @RequestMapping(value = "/comments/reviews/{reviewId}", method = RequestMethod.POST)
-    public ResponseEntity<?> createCommentForReview(@PathVariable("reviewId") Integer reviewId, @RequestBody @Valid Comment comment) {
+    public ResponseEntity<?> createCommentForReview(@PathVariable("reviewId") Integer reviewId,
+                                                    @RequestBody @Valid Comment comment) {
+
         Optional<Review> optionalReview = reviewRepository.findById(reviewId);
+        if (!optionalReview.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         Review review = optionalReview.get();
         comment.setReview(review);
         comment = commentRepository.save(comment);
-        return new ResponseEntity<>(comment, HttpStatus.OK);
+
+        Optional<ReviewDocument> reviewDocumentOpt = reviewMongoRepository.findById(reviewId.toString());
+        ReviewDocument reviewDocument = reviewDocumentOpt.get();
+
+        CommentDocument commentDocument = new CommentDocument();
+        commentDocument.setId(comment.getId().toString());
+        commentDocument.setText(comment.getText());
+
+        reviewDocument.getComments().add(commentDocument);
+        reviewMongoRepository.save(reviewDocument);
+
+        return new ResponseEntity<>(commentDocument, HttpStatus.OK);
     }
 
     /**
