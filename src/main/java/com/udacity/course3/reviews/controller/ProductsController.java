@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -63,13 +62,13 @@ public class ProductsController {
      * @return The list of products.
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public List<?> listProducts() {
+    public ResponseEntity<List<?>> listProducts() {
         Iterable<Product> productIterable = productRepository.findAll();
         if (productIterable == null) {
-            throw new HttpServerErrorException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         List<Product> target = new ArrayList<>();
         productIterable.forEach(product -> target.add(product));
-        return target;
+        return ResponseEntity.ok().body(target);
     }
 }

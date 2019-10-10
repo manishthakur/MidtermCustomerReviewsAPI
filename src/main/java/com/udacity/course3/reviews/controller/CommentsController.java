@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -45,14 +44,18 @@ public class CommentsController {
                                                     @RequestBody @Valid Comment comment) {
 
         Optional<Review> optionalReview = reviewRepository.findById(reviewId);
-        if (!optionalReview.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (optionalReview.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
         Review review = optionalReview.get();
         comment.setReview(review);
         comment = commentRepository.save(comment);
 
         Optional<ReviewDocument> reviewDocumentOpt = reviewMongoRepository.findById(reviewId.toString());
+        if (reviewDocumentOpt.isEmpty()) {
+            // If review found in mysql however not in mongodb
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         ReviewDocument reviewDocument = reviewDocumentOpt.get();
 
         CommentDocument commentDocument = new CommentDocument();
@@ -75,11 +78,11 @@ public class CommentsController {
      * @param reviewId The id of the review.
      */
     @RequestMapping(value = "/comments/reviews/{reviewId}", method = RequestMethod.GET)
-    public List<?> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
+    public ResponseEntity<List<?>> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
         List<Comment> comments = commentRepository.findByReviewId(reviewId);
         if (comments == null || comments.isEmpty()) {
-            throw new HttpServerErrorException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
-        return comments;
+        return ResponseEntity.ok().body(comments);
     }
 }
