@@ -4,6 +4,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document("review")
@@ -20,7 +21,7 @@ public class ReviewDocument {
     @NotNull
     private String text;
 
-    private List<CommentDocument> comments;
+    private List<CommentDocument> comments = new ArrayList<>();
 
     public String getId() {
         return id;

@@ -6,16 +6,16 @@ import com.udacity.course3.reviews.entity.Review;
 import com.udacity.course3.reviews.repository.CommentRepository;
 import com.udacity.course3.reviews.repository.ProductRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class CommentRepositoryTests {
 

@@ -4,7 +4,7 @@ import com.udacity.course3.reviews.entity.Product;
 import com.udacity.course3.reviews.entity.Review;
 import com.udacity.course3.reviews.entity.ReviewDocument;
 import com.udacity.course3.reviews.repository.ProductRepository;
-import com.udacity.course3.reviews.repository.ReviewDocumentRepository;
+import com.udacity.course3.reviews.repository.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ public class ReviewsController {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
-    private ReviewDocumentRepository documentRepository;
+    private ReviewMongoRepository documentRepository;
 
     /**
      * Creates a review for a product.
