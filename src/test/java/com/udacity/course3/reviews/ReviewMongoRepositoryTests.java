@@ -69,22 +69,4 @@ public class ReviewMongoRepositoryTests {
         commentDocument.setText("Great Review");
         return commentDocument;
     }
-
-//    private Product getProduct() {
-//        Product product;
-//        Iterable<Product> productIterable = productRepository.findAll();
-//        product = (productIterable != null && productIterable.iterator() != null)
-//                ? productIterable.iterator().next() : null;
-//
-//        if (product != null) {
-//            return product;
-//        } else {
-//            product = new Product();
-//        }
-//
-//        product.setName("Test Product while Testing.");
-//        product.setPrice(101.0);
-//        product = productRepository.save(product);
-//        return productRepository.findById(product.getId()).get();
-//    }
 }
