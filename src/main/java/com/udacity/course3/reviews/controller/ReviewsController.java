@@ -42,7 +42,7 @@ public class ReviewsController {
     public ResponseEntity<?> createReviewForProduct(@PathVariable("productId") Integer productId, @RequestBody @Valid Review review) {
 
         Optional<Product> productOptional = productRepository.findById(productId);
-        if (!productOptional.isPresent()) {
+        if (productOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         review.setProduct(productOptional.get());
@@ -69,7 +69,7 @@ public class ReviewsController {
 
         List<Review> reviews = reviewRepository.findByProductId(productId);
         if (reviews == null || reviews.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         List<ReviewDocument> reviewDocuments = new ArrayList<>();
         reviews.forEach(review -> {
